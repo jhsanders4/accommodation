@@ -201,21 +201,22 @@
   }
   .map-hotspot{
     position:absolute;
-    border:3px solid transparent;
-    background:rgba(255,255,255,0);
-    border-radius:3px;
-    transition:all .25s ease;
+    width:13px;
+    height:13px;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
     pointer-events:none;
   }
   .map-hotspot.active{
-    border:3px solid #fff;
-    background:rgba(184,92,56,0.35);
-    box-shadow:0 0 0 3px var(--clay), 0 0 16px 5px rgba(184,92,56,0.7);
-    animation:hotspotPulse 1.6s ease-in-out infinite;
+    background:var(--clay);
+    border:2.5px solid #fff;
+    box-shadow:0 0 0 2px var(--clay);
+    animation:hotspotPing 1.5s ease-out infinite;
   }
-  @keyframes hotspotPulse{
-    0%, 100%{ box-shadow:0 0 0 3px var(--clay), 0 0 16px 5px rgba(184,92,56,0.7); }
-    50%{ box-shadow:0 0 0 3px var(--clay), 0 0 24px 9px rgba(184,92,56,0.95); }
+  @keyframes hotspotPing{
+    0%  { box-shadow:0 0 0 2px var(--clay), 0 0 0 4px rgba(184,92,56,0.55); }
+    65% { box-shadow:0 0 0 2px var(--clay), 0 0 0 20px rgba(184,92,56,0); }
+    100%{ box-shadow:0 0 0 2px var(--clay), 0 0 0 20px rgba(184,92,56,0); }
   }
   .map-caption{
     margin-top:10px;
@@ -439,8 +440,6 @@ const MAP_POINTS = {
   "limon-combined": [61.49, 32.32],
   "turunc-combined": [67.79, 34.61],
 };
-const HOTSPOT_W = 1.9, HOTSPOT_H = 2.6;
-
 let currentHotspotId = null;
 let currentHotspotLabel = null;
 let calibrateMode = false;
@@ -453,10 +452,8 @@ function drawHotspot(roomId){
   document.querySelectorAll('.map-hotspot').forEach(h => h.remove());
   const box = document.createElement('div');
   box.className = "map-hotspot active";
-  box.style.left = (pt[0] - HOTSPOT_W/2) + "%";
-  box.style.top = (pt[1] - HOTSPOT_H/2) + "%";
-  box.style.width = HOTSPOT_W + "%";
-  box.style.height = HOTSPOT_H + "%";
+  box.style.left = pt[0] + "%";
+  box.style.top = pt[1] + "%";
   frame.appendChild(box);
 }
 
