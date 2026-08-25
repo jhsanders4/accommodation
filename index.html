@@ -474,8 +474,8 @@ function drawHotspot(roomId){
   box.addEventListener('click', () => {
     const target = document.getElementById('block-' + roomId);
     if (!target) return;
+    document.querySelectorAll('.room-block.search-flash').forEach(el => el.classList.remove('search-flash'));
     target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    target.classList.remove('search-flash');
     void target.offsetWidth;
     target.classList.add('search-flash');
   });
@@ -697,8 +697,8 @@ function render(){
         locateRoom(id, label, true);
         const target = document.getElementById('block-' + id);
         if (!target) return;
+        document.querySelectorAll('.room-block.search-flash').forEach(el => el.classList.remove('search-flash'));
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        target.classList.remove('search-flash');
         void target.offsetWidth;
         target.classList.add('search-flash');
       });
