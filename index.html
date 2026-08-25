@@ -220,6 +220,21 @@
     65% { box-shadow:0 0 0 2px #e8192c, 0 0 0 20px rgba(232,25,44,0); }
     100%{ box-shadow:0 0 0 2px #e8192c, 0 0 0 20px rgba(232,25,44,0); }
   }
+  .map-zone{
+    position:absolute;
+    width:22px;
+    height:22px;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    cursor:pointer;
+    pointer-events:auto;
+    background:transparent;
+    transition:background .15s, box-shadow .15s;
+  }
+  .map-zone:hover{
+    background:rgba(232,25,44,0.18);
+    box-shadow:0 0 0 2px rgba(232,25,44,0.45);
+  }
   .map-caption{
     margin-top:10px;
     font-size:13px;
@@ -467,7 +482,7 @@ function drawHotspot(roomId){
   frame.appendChild(box);
 }
 
-function locateRoom(roomId, label){
+function locateRoom(roomId, label, noScroll){
   currentHotspotId = roomId;
   currentHotspotLabel = label;
   document.querySelectorAll('.map-hotspot').forEach(h => h.remove());
@@ -479,8 +494,10 @@ function locateRoom(roomId, label){
       ? `Showing: <b>${escapeHtml(label)}</b>`
       : `No map position saved yet for <b>${escapeHtml(label)}</b> — tick "Adjust mode" below and click its spot on the map.`;
   }
-  const frame = document.getElementById('mapFrame');
-  if (frame) frame.scrollIntoView({ behavior: "smooth", block: "center" });
+  if (!noScroll){
+    const frame = document.getElementById('mapFrame');
+    if (frame) frame.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
   updateCalibStatus();
 }
 
@@ -661,6 +678,33 @@ function render(){
       locateRoom(t.getAttribute('data-locate'), t.getAttribute('data-label'));
     });
   });
+
+  // Build label lookup then draw always-on clickable zones over every map point
+  const roomLabels = {};
+  document.querySelectorAll('button[data-locate]').forEach(btn => {
+    roomLabels[btn.getAttribute('data-locate')] = btn.getAttribute('data-label');
+  });
+  const mapFrame = document.getElementById('mapFrame');
+  if (mapFrame){
+    Object.entries(MAP_POINTS).forEach(([id, pt]) => {
+      const zone = document.createElement('div');
+      zone.className = 'map-zone';
+      zone.style.left = pt[0] + '%';
+      zone.style.top = pt[1] + '%';
+      const label = roomLabels[id] || id;
+      zone.title = label;
+      zone.addEventListener('click', () => {
+        locateRoom(id, label, true);
+        const target = document.getElementById('block-' + id);
+        if (!target) return;
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.classList.remove('search-flash');
+        void target.offsetWidth;
+        target.classList.add('search-flash');
+      });
+      mapFrame.appendChild(zone);
+    });
+  }
 }
 
 
