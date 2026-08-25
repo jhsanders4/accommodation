@@ -212,6 +212,8 @@
     border:2.5px solid #fff;
     box-shadow:0 0 0 2px #e8192c;
     animation:hotspotPing 1.5s ease-out infinite;
+    pointer-events:auto;
+    cursor:pointer;
   }
   @keyframes hotspotPing{
     0%  { box-shadow:0 0 0 2px #e8192c, 0 0 0 4px rgba(232,25,44,0.55); }
@@ -454,6 +456,14 @@ function drawHotspot(roomId){
   box.className = "map-hotspot active";
   box.style.left = pt[0] + "%";
   box.style.top = pt[1] + "%";
+  box.addEventListener('click', () => {
+    const target = document.getElementById('block-' + roomId);
+    if (!target) return;
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target.classList.remove('search-flash');
+    void target.offsetWidth;
+    target.classList.add('search-flash');
+  });
   frame.appendChild(box);
 }
 
@@ -545,6 +555,7 @@ function render(){
         const arr = assignments[id] || [];
         const block = document.createElement('div');
         block.className = "room-block" + (matchesQuery(arr) ? " hit" : "");
+        block.id = "block-" + id;
         if (r.bed === "NA"){
           block.innerHTML = `
             <div class="room-block-head">
@@ -597,6 +608,7 @@ function render(){
       const arr = assignments[v.combinedId] || [];
       const block = document.createElement('div');
       block.className = "room-block" + (matchesQuery(arr) ? " hit" : "");
+      block.id = "block-" + v.combinedId;
       block.innerHTML = `
         <div class="room-block-head">
           <span class="bed-badge V">V</span>
@@ -610,6 +622,7 @@ function render(){
       const uArr = assignments[v.upperId] || [];
       const uBlock = document.createElement('div');
       uBlock.className = "room-block" + (matchesQuery(uArr) ? " hit" : "");
+      uBlock.id = "block-" + v.upperId;
       uBlock.innerHTML = `
         <div class="room-block-head">
           <span class="bed-badge D">D</span>
@@ -623,6 +636,7 @@ function render(){
       const gArr = assignments[v.groundId] || [];
       const gBlock = document.createElement('div');
       gBlock.className = "room-block" + (matchesQuery(gArr) ? " hit" : "");
+      gBlock.id = "block-" + v.groundId;
       gBlock.innerHTML = `
         <div class="room-block-head">
           <span class="bed-badge T">T</span>
