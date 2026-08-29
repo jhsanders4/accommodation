@@ -214,11 +214,18 @@
     animation:hotspotPing 1.5s ease-out infinite;
     pointer-events:auto;
     cursor:pointer;
+    --ping-start:4px;
+    --ping-end:20px;
   }
   @keyframes hotspotPing{
-    0%  { box-shadow:0 0 0 2px #e8192c, 0 0 0 4px rgba(232,25,44,0.55); }
-    65% { box-shadow:0 0 0 2px #e8192c, 0 0 0 20px rgba(232,25,44,0); }
-    100%{ box-shadow:0 0 0 2px #e8192c, 0 0 0 20px rgba(232,25,44,0); }
+    0%  { box-shadow:0 0 0 2px #e8192c, 0 0 0 var(--ping-start) rgba(232,25,44,0.55); }
+    65% { box-shadow:0 0 0 2px #e8192c, 0 0 0 var(--ping-end)   rgba(232,25,44,0); }
+    100%{ box-shadow:0 0 0 2px #e8192c, 0 0 0 var(--ping-end)   rgba(232,25,44,0); }
+  }
+  @media(max-width:640px){
+    .map-hotspot{ width:8px; height:8px; }
+    .map-hotspot.active{ border-width:1.5px; --ping-start:2px; --ping-end:11px; }
+    .map-zone{ width:14px; height:14px; }
   }
   .map-zone{
     position:absolute;
@@ -242,6 +249,42 @@
     min-height:18px;
   }
   .map-caption b{ color:var(--clay-dark); }
+  .map-expand-btn{
+    position:absolute; top:8px; right:8px;
+    width:28px; height:28px;
+    background:rgba(255,255,255,0.82);
+    border:1px solid var(--line);
+    border-radius:5px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; opacity:0.7;
+    transition:opacity .15s;
+    z-index:2;
+  }
+  .map-expand-btn:hover{ opacity:1; }
+  .map-expand-btn svg{ width:14px; height:14px; }
+  .map-lightbox{
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,0.82);
+    z-index:9999;
+    align-items:center; justify-content:center;
+    cursor:zoom-out;
+  }
+  .map-lightbox.open{ display:flex; }
+  .map-lightbox img{
+    max-width:95vw; max-height:92vh;
+    object-fit:contain;
+    border-radius:6px;
+    box-shadow:0 8px 40px rgba(0,0,0,0.5);
+    cursor:default;
+  }
+  .map-lightbox-close{
+    position:fixed; top:16px; right:20px;
+    font-size:30px; line-height:1;
+    color:#fff; opacity:0.75;
+    cursor:pointer; background:none; border:none;
+    font-family:inherit;
+  }
+  .map-lightbox-close:hover{ opacity:1; }
   .locate-btn{
     flex:0 0 auto;
     width:20px; height:20px;
@@ -765,6 +808,37 @@ document.getElementById('mapFrame').addEventListener('click', e => {
 });
 
 render();
+
+// ---- Map lightbox ----
+(function(){
+  const frame = document.getElementById('mapFrame');
+  if (!frame) return;
+  const mapImg = frame.querySelector('img');
+  if (!mapImg) return;
+
+  // Expand button
+  const btn = document.createElement('button');
+  btn.className = 'map-expand-btn';
+  btn.title = 'View full map';
+  btn.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 6V1h5M10 1h5v5M15 10v5h-5M6 15H1v-5"/></svg>';
+  frame.appendChild(btn);
+
+  // Lightbox
+  const lb = document.createElement('div');
+  lb.className = 'map-lightbox';
+  lb.innerHTML = '<button class="map-lightbox-close" aria-label="Close">&#x2715;</button><img alt="Venue map — enlarged">';
+  document.body.appendChild(lb);
+  const lbImg = lb.querySelector('img');
+  lbImg.src = mapImg.src;
+
+  function open(){ lb.classList.add('open'); document.body.style.overflow='hidden'; }
+  function close(){ lb.classList.remove('open'); document.body.style.overflow=''; }
+
+  btn.addEventListener('click', e => { e.stopPropagation(); open(); });
+  lb.addEventListener('click', e => { if (e.target !== lbImg) close(); });
+  lb.querySelector('.map-lightbox-close').addEventListener('click', close);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+})();
 </script>
 
 </body>
